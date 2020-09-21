@@ -104,7 +104,7 @@ tarsh() {
 
 power_boot_add() {
 	[ -z "${1}" -o -z "${2}" ] && logerror "参数不能为空！"
-	cat > /etc/init.d/mixbox <<-EOF
+	cat > /etc/init.d/${1} <<-EOF
 #!/bin/sh /etc/rc.common
 
 START=99

@@ -9,7 +9,10 @@ echo "**                                           **"
 echo "***********************************************"
 MBURL="https://cdn.jsdelivr.net/gh/monlor/mixbox@latest"
 source <(curl -kfsSl ${MBURL}/config/mixbox.conf) || exit 1
-source <(curl -kfsSl ${MBURL}/scripts/helper.sh) || exit 1
+echo "兼容配置：[ ${MBHELPERS} ]"
+read -p "请输入设备兼容配置名[回车即default]：" helper
+source <(curl -kfsSl ${MBURL}/helpers/${helper:-default}.sh) || exit 1
+
 loginfo "请按任意键安装工具箱(Ctrl + C 退出)."
 read answer
 ARCH=$(uname -ms | tr ' ' '_' | tr '[A-Z]' '[a-z]')
@@ -48,10 +51,11 @@ MBINROOT=${MBINROOT:-${MBROOT}/apps}
 loginfo "下载工具箱文件..."
 rm -rf ${MBTMP}/mixbox.tar.gz &> /dev/null
 wgetsh ${MBTMP}/mixbox.tar.gz ${MBINURL}/appstore/mixbox.tar.gz || exit 1
-loginfo "解压工具箱文件"
+loginfo "安装工具箱文件..."
 tarsh ${MBTMP}/mixbox.tar.gz ${MBTMP}
 # 安装工具箱文件
 cp -rf ${MBTMP}/mixbox ${MBROOT}
+wgetsh ${MBROOT}/lib/helper.sh ${MBURL}/helpers/${helper:-default}.sh || exit 1
 chmod -R +x ${MBROOT}/*
 
 loginfo "初始化工具箱配置信息..."
