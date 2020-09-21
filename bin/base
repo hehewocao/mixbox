@@ -1,0 +1,195 @@
+#!/bin/sh 
+#copyright by monlor
+source /etc/profile &> /dev/null
+export PATH=$PATH:${MBROOT}/bin
+source ${MBROOT}/lib/helper.sh
+source ${MBROOT}/lib/jshn.sh
+
+checkuci() {
+	# 最初用来检查插件的uci是否存在，现在当插件已经安装则返回0
+	cat ${MBROOT}/config/applist.txt | grep -E "^${1}$" &> /dev/null
+}
+
+cutsh() {
+	# 传入要分割的文本和要分割出的位置，以逗号分割
+	local delimiter=","
+	if [ -n "$1" -a -n "$2" ]; then
+		[ -n "$3" ] && delimiter="$3"
+		echo "$1" | cut -d"${delimiter}" -f"$2"
+	elif [ -n "$1" -a -z "$2" ]; then
+		[ -n "$2" ] && delimiter="$2"
+		xargs | cut -d"${delimiter}" -f"$1" 
+	fi
+
+}
+
+pssh() {
+	ps -aux &> /dev/null
+	[ $? -eq 0 ] && ps -aux | grep -v grep || ps -w | grep -v grep
+}
+
+_log() {
+	local level=$1
+	shift 1
+	local logpath=${MBROOT}/log/${appname:-mixbox}.log
+	echo 【$(TZ=UTC-8 date -R +%Y年%m月%d日\ %X)】【${level}】: ${@} 2>&1 | tee -a ${logpath} 
+}
+
+loginfo() {
+	_log INFO "$@"
+}
+
+logerror() {
+	_log ERROR "$@"
+	exit 1
+}
+
+logwarn() {
+	_log WARN "$@"
+}
+
+logclear() {
+	local logpath=${MBROOT}/log/${appname:-mixbox}.log
+	local num=`cat ${logpath} | wc -l `
+	if [ "${num}" -gt 999 ]; then
+		loginfo "日志过多，自动清除日志..."
+		cat /dev/null > ${logpath}
+	fi
+}
+
+
+# 用于执行命令，并输出到日志文件
+logexe() {
+	local logpath=${MBROOT}/log/${appname:-mixbox}.log
+	eval "$@" 2>&1 | tee -a ${logpath} 
+}
+
+umountsh() {
+	local mount_point="$1"
+	[ -z "${mount_point}" ] && return 1
+	mount_points="$(df -h | grep -Ew "[ ]*"${mount_point}"[ ]*" | awk '{print$6}')"
+	if [ -n "${mount_points}" ]; then
+		for i in $(echo ${mount_points} | tr ' ' '\n'); do
+	 		umount -lf "${i}"
+		done
+	fi
+	return 0
+}
+
+write_firewall_start(){
+	loginfo "添加nat-start触发事件..."
+	[ -z "${appname}" ] && logerror "插件名称不存在！"
+	echo "${appname}" >> ${MBROOT}/config/firewall.txt
+}
+
+remove_firewall_start(){
+	loginfo "删除nat-start触发..."
+	[ -z "${appname}" ] && logerror "插件名称不存在！"
+	sed -i "/^${appname}$/d" ${MBROOT}/config/firewall.txt
+}
+
+# 通过传入一个字符串，取变量名称等于该字符串的变量值
+parse_str() {
+  [ -z "${1}" ] && echo -n "" || eval echo -n '$'"${1}"
+}
+
+base_encode() {
+	if [ -z "${1}" ]; then
+		echo -n "" 
+	else
+		echo -n "$*" | base64 | tr -d '\n'
+	fi
+}
+
+base_decode() {
+	if [ -z "${1}" ]; then
+		echo -n "" 
+	else
+		echo -n "$*" | base64 -d
+	fi
+}
+
+# $1 > $2 => 1
+# $1 < $2 => -1
+# $1 = $2 => 0
+versioncmp() {
+
+	[ "$1" = "$2" ] && echo -n "0" && return
+
+	if test "$(echo "$@" | tr " " "\n" | sort | head -n 1)" != "$1"; then
+		echo -n "-1"
+	else 
+		echo -n "1"
+	fi
+
+}
+
+open_port () {
+	[ -z "$1" ] && logerror "开放端口不能为空！"
+	local port="$1"
+	local protocol=${2:-tcp}
+	loginfo "开放端口[${port}]/${protocol}"
+	if [ -n "$(echo ${port} | grep ',')" ]; then
+		iptables -I INPUT -p "${protocol}" -m multiport --dport "${port}" -m comment --comment "mixbox-${appname}" -j ACCEPT 
+	else
+		iptables -I INPUT -p "${protocol}" --dport "${port}" -m comment --comment "mixbox-${appname}" -j ACCEPT 
+	fi
+}
+
+close_port () {
+	loginfo "关闭端口插件${appname}所有端口..."
+	eval `iptables -S | grep "mixbox-${appname}" | sed -e 's/-A/iptables -D/g' | sed -e 's/\$/;/g'`
+}
+
+download_binfile() {
+	local binfile=$1
+	local force=${2:-0} # 0/1
+	local appname=${appname:-mixbox}
+	[ -z "${binfile}" ] && logwarn "未下载任何二进制程序！" && return 0
+	echo ${binfile} | tr ',' '\n' | while read file; do
+		if [ ! -f ${MBINROOT}/${appname}/${file} ] || [ "${force}" -eq 1 ]; then
+			loginfo "下载二进制文件:$file..."
+			[ ! -d "${MBINROOT}/${appname}" ] && mkdir -p ${MBINROOT}/${appname}
+			wgetsh ${MBINROOT}/${appname}/${file} ${MBINURL}/binfiles/${APPNAME}/${file}_${MBARCH} || exit 1
+			chmod +x ${MBINROOT}/${appname}/${file}
+		fi
+	done
+}
+
+# exists nil then exit 1
+assert_nil() {
+	local nil_names=""
+	for name in $@; do
+		[ -z "${name}" ] && continue
+		local value="$(parse_str ${name})"
+		[ -z "${value}" ] && nil_names="${nil_names},${name}"
+	done
+	nil_names=$(echo "${nil_names}" | sed -e 's/^,//')
+	if [ -n "${nil_names}" ]; then 
+		logerror "${nil_names}不能为空!"
+		return 0
+	fi
+	return 1
+}
+
+add_lib_path() {
+	assert_nil "${1}" && return 1
+	cat ${MBROOT}/config/mixbox.conf | grep "${1}" && logerror "${1}已存在！" && return 1
+	echo "LD_LIBRARY_PATH=\${LD_LIBRARY_PATH}:${1}" >> ${MBROOT}/config/mixbox.conf
+}
+
+del_lib_path() {
+	assert_nil "${1}" && return 1
+	pc_delete "${1}" ${MBROOT}/config/mixbox.conf
+}
+
+add_env_path() {
+	assert_nil "${1}" && return 1
+	cat ${MBROOT}/config/mixbox.conf | grep "${1}" && logerror "${1}已存在！" && return 1
+	echo "PATH=\${PATH}:${1}" >> ${MBROOT}/config/mixbox.conf
+}
+
+del_env_path() {
+	assert_nil "${1}" && return 1
+	pc_delete "${1}" ${MBROOT}/config/mixbox.conf
+}

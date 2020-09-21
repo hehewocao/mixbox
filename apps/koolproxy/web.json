@@ -1,0 +1,17 @@
+[
+    {
+        "type": "select",
+        "label": "运行模式",
+        "name": "mode",
+        "options": [
+            { "label": "全局模式", "value": "1" },
+            { "label": "黑名单模式", "value": "2" },
+            { "label": "视频模式", "value": "3" }
+        ]
+    },
+    {
+        "type": "hyperlink",
+        "label": "证书下载",
+        "url": "http://110.110.110.110"
+    }
+]

@@ -1,0 +1,12 @@
+[
+    {
+        "type": "input",
+        "label": "签到时间(0-23)",
+        "name": "time"
+    },
+    {
+        "type": "input",
+        "label": "京东cookie",
+        "name": "cookie"
+    }
+]

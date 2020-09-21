@@ -1,0 +1,17 @@
+[
+  {
+    "type": "hyperlink",
+    "label": "控制面板",
+    "url": "http://{LANIP}:9999/ui"
+  },
+  {
+    "type": "switch",
+    "label": "启用fakeip",
+    "name": "fake_ip_enabled"
+  },
+  {
+    "type": "input",
+    "label": "订阅地址",
+    "name": "subscribe_url"
+  }
+]

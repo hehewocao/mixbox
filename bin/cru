@@ -1,0 +1,43 @@
+#!/bin/sh -e
+#copyright by monlor
+source /etc/profile &> /dev/null
+source ${MBROOT}/lib/helper.sh
+
+# 添加定时任务，利用uci来储存信息，cru {a|d|c} [name] [crontab] 
+method="$1"
+name="$2"
+# content="$3"
+
+case "$method" in
+a) 
+	[ -z "$name" -o -z "$3" ] && exit 1
+	cat ${MBROOT}/config/crontab.txt | grep -E "^${name}," &> /dev/null && logerror "${name}任务已存在！"
+	echo "${name},${3}" >> ${MBROOT}/config/crontab.txt
+	;;
+d) 
+	[ -z "$name" ] && exit 1
+	pc_delete "^${name}," ${MBROOT}/config/crontab.txt
+ 	;;
+c)
+	echo -n > ${MBROOT}/config/crontab.txt
+	;;
+l)
+	cat ${MBROOT}/config/crontab.txt
+	;;
+esac
+
+# 使定时任务生效
+if [ -d /etc/crontabs/ ]; then 
+	cronpath="/etc/crontabs/root"
+elif [ -d /var/spool/cron/ ]; then
+	cronpath="/var/spool/cron/root"
+elif [ -d /var/spool/cron/crontabs/ ]; then
+	cronpath="/var/spool/cron/crontabs/root"
+else
+	echo "【Tools】" "找不到定时任务文件！" 
+	exit 1
+fi
+pc_delete "#mixbox" ${cronpath} &> /dev/null
+cat ${MBROOT}/config/crontab.txt | cut -d',' -f2 | sed -e 's/$/ #mixbox/g' >> ${cronpath}
+
+exit 0
