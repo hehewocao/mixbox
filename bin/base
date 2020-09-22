@@ -142,7 +142,7 @@ close_port () {
 }
 
 download_binfile() {
-	local binfile=$1
+	local binfile="$1"
 	local force=${2:-0} # 0/1
 	local appname=${appname:-mixbox}
 	[ -z "${binfile}" ] && logwarn "未下载任何二进制程序！" && return 0
@@ -150,7 +150,7 @@ download_binfile() {
 		if [ ! -f ${MBINROOT}/${appname}/${file} ] || [ "${force}" -eq 1 ]; then
 			loginfo "下载二进制文件:$file..."
 			[ ! -d "${MBINROOT}/${appname}" ] && mkdir -p ${MBINROOT}/${appname}
-			wgetsh ${MBINROOT}/${appname}/${file} ${MBINURL}/binfiles/${APPNAME}/${file}_${MBARCH} || exit 1
+			wgetsh ${MBINROOT}/${appname}/${file} ${MBINURL}/${appname}/${file}_${MBARCH} || exit 1
 			chmod +x ${MBINROOT}/${appname}/${file}
 		fi
 	done

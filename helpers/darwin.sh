@@ -1,15 +1,15 @@
 # 此脚本提供工具箱所需的一些变量或者函数，后期用于兼容各类不同的系统环境
 
-WANIP=$(ubus call network.interface.wan status 2> /dev/null | grep \"address\" | grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' || echo -n "127.0.0.1")
-LANIP=$(uci get network.lan.ipaddr 2> /dev/null || echo -n "127.0.0.1")
-MODEL=$(cat /proc/xiaoqiang/model 2> /dev/null || uname -s)
+WANIP="127.0.0.1"
+LANIP="127.0.0.1"
+MODEL=$(uname -s)
 
 on_install() {
 	return
 }
 
 on_init() {
-	[ ! -d /tmp/etc/dnsmasq.d ] && mkdir /tmp/etc/dnsmasq.d
+	return
 }
 
 _quote() {
@@ -24,13 +24,13 @@ _quote() {
 pc_insert_next() {
 	PATTERN=$(_quote "$1")
 	CONTENT=$(_quote "$2")
-	sed -i "/$PATTERN/a$CONTENT" $3
+	sed -i "" "/$PATTERN/a$CONTENT" $3
 }
 
 pc_insert_prev() {
 	PATTERN=$(_quote "$1")
 	CONTENT=$(_quote "$2")
-	sed -i "/$PATTERN/i$CONTENT" $3
+	sed -i "" "/$PATTERN/i$CONTENT" $3
 }
 
 # This function looks for a string, and replace it with a different string inside a given file
@@ -38,7 +38,7 @@ pc_insert_prev() {
 pc_replace() {
 	PATTERN=$(_quote "$1")
 	CONTENT=$(_quote "$2")
-	sed -i "s/$PATTERN/$CONTENT/" $3
+	sed -i "" "s/$PATTERN/$CONTENT/" $3
 }
 
 # This function will append a given string at the end of a given file
@@ -51,11 +51,11 @@ pc_append() {
 # $1 The line to locate, $2: Config file where to delete
 pc_delete() {
 	PATTERN=$(_quote "$1")
-	sed -i "/$PATTERN/d" $2
+	sed -i "" "/$PATTERN/d" $2
 }
 
 pc_delete_line() {
-	sed -i "$1,$2d" $3
+	sed -i "" "$1,$2d" $3
 }
 
 wgetsh() {
@@ -103,61 +103,33 @@ tarsh() {
 }
 
 power_boot_add() {
-	[ -z "${1}" -o -z "${2}" ] && logerror "参数不能为空！"
-	cat > /etc/init.d/${1} <<-EOF
-#!/bin/sh /etc/rc.common
-
-START=99
-/bin/sh ${2} &
-EOF
-	chmod +x /etc/init.d/${1}
-	/etc/init.d/${1} enable
+	logwarn "${MODEL}开启启动待完善！"
 }
 
 power_boot_del() {
-	[ -z "${1}" ] && logerror "参数不能为空！"
-	/etc/init.d/${1} disable
-	rm -rf /etc/init.d/${1}
+	return
 }
 
 # 添加脚本到防火墙触发文件中
 firewall_restart_add() {
-	[ -z "${1}" -o -z "${2}" ] && logerror "参数不能为空！"
-	uci set firewall.${1}=include
-	uci set firewall.${1}.type=script
-	uci set firewall.${1}.path="${2}"
-	uci set firewall.${1}.reload=1
-	uci set firewall.${1}.family=any
-	uci commit firewall
+	logwarn "${MODEL}防火墙启动事件待完善！"
 }
 
 # 移除防火墙触发文件中的脚本
 firewall_restart_del() {
-	[ -z "${1}" ] && logerror "参数不能为空！"
-	uci del firewall.${1}
-	uci commit firewall
+	return
 }
 
 dnsmasq_reload() {
-	loginfo "重启dnsmasq..."
-	/etc/init.d/dnsmasq reload &> /dev/null
+	return
 }
 
 dnsmasq_add_config() {
-	[ -z "${1}" ] && return 1
-	for i in "$@"; do
-		loginfo "添加dnsmasq配置文件:${i}"
-		ln -sf ${MBTMP}/${i} /tmp/etc/dnsmasq.d/${i}
-	done
+	logwarn "${MODEL}的dnsmasq待完善！"
 }
 
 dnsmasq_del_config() {
-	[ -z "${1}" ] && return 1
-	for i in "$@"; do
-		loginfo "删除dnsmasq配置文件:${i}"
-		rm -rf /tmp/etc/dnsmasq.d/${i}
-		rm -rf ${MBTMP}/${i}
-	done
+	return
 }
 
 daemon_start() {
@@ -189,28 +161,17 @@ add_env_profile() {
 		logwarn "环境变量配置已添加！"
 		return 1
 	fi
-	echo "${1} #mixbox" >> /etc/profile
+	sudo echo "${1} #mixbox" >> /etc/profile
 }
 
 del_env_profile() {
 	[ -z "${1}" ] && logwarn "add_env_profile参数不能为空！" && return 1
-	pc_delete "${1} #mixbox" /etc/profile
+  PATTERN=$(_quote "$1")
+	sudo sed -i "" "/$PATTERN/d" /etc/profile
 }
 
 general_cron_task() {
-	# 使定时任务生效
-	if [ -d /etc/crontabs/ ]; then 
-		cronpath="/etc/crontabs/root"
-	elif [ -d /var/spool/cron/ ]; then
-		cronpath="/var/spool/cron/root"
-	elif [ -d /var/spool/cron/crontabs/ ]; then
-		cronpath="/var/spool/cron/crontabs/root"
-	else
-		echo "【Tools】" "找不到定时任务文件！" 
-		exit 1
-	fi
-
-	pc_delete "#mixbox" ${cronpath} &> /dev/null
-	cat ${MBROOT}/config/crontab.txt | cut -d',' -f2 | sed -e 's/$/ #mixbox/g' >> ${cronpath}
-
+	[ ! -d /etc/crontab ] && sudo mkdir /etc/crontab
+	sudo sed -i "" "/#mixbox/d" /etc/crontab
+	cat ${MBROOT}/config/crontab.txt | cut -d',' -f2 | sudo sed -e 's/$/ #mixbox/g' >> ${cronpath}
 }

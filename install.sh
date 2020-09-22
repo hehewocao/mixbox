@@ -2,7 +2,7 @@
 #copyright by monlor
 
 loginfo() {
-	echo 【$(TZ=UTC-8 date +%Y年%m月%d日\ %X)】: "${@}"
+	echo 【$(TZ=UTC-8 date +%Y年%m月%d日\ %X)】【INFO】: "${@}"
 }
 
 alias logwarn='loginfo'
@@ -17,22 +17,26 @@ loginfo "***********************************************"
 loginfo "请按任意键安装工具箱(Ctrl + C 退出)."
 read answer
 
-MBURL="https://raw.githubusercontent.com/monlor/mixbox/master"
-curl -kfsSlo /tmp/mixbox.conf ${MBURL}/config/mixbox.conf || exit 1
+cp helpers/darwin.sh /tmp/helper.sh 
+cp config/mixbox.conf /tmp/mixbox.conf
+# MBURL="https://raw.githubusercontent.com/monlor/mixbox/master"
+# curl -kfsSlo /tmp/mixbox.conf ${MBURL}/config/mixbox.conf || exit 1
 source /tmp/mixbox.conf
-loginfo "支持的兼容配置：[ ${MBHELPERS} ]"
-loginfo "请输入设备兼容配置名[回车即default]：" 
-read helper
-curl -kfsSlo /tmp/helper.sh ${MBURL}/helpers/${helper:-default}.sh || exit 1
+# loginfo "支持的兼容配置：[ ${MBHELPERS} ]"
+# loginfo "请输入设备兼容配置名[回车即default]：" 
+# read helper
+# curl -kfsSlo /tmp/helper.sh ${MBURL}/helpers/${helper:-default}.sh || exit 1
 source /tmp/helper.sh
-rm -rf /tmp/mixbox.conf
+# rm -rf /tmp/mixbox.conf
 [ ! -d "${MBTMP}" ] && mkdir -p ${MBTMP}
 
 ARCH=$(uname -ms | tr ' ' '_' | tr '[A-Z]' '[a-z]')
-[ -n "$(echo $ARCH | grep -E "linux.*aarch64.*")" ] && MBARCH="linux_aarch64"
-[ -n "$(echo $ARCH | grep -E "linux.*arm.*")" ] && MBARCH="linux_armv7"
-[ -n "$(echo $ARCH | grep -E "linux.*mips.*")" ] && MBARCH="linux_mipsle"
-[ -n "$(echo $ARCH | grep -E "linux.*x86_64.*")" ] && MBARCH="linux_amd64"
+echo $ARCH | grep -qE "linux.*aarch64.*" && MBARCH="linux_aarch64"
+echo $ARCH | grep -qE "linux.*arm.*" && MBARCH="linux_armv7"
+echo $ARCH | grep -qE "linux.*mips.*" && MBARCH="linux_mipsle"
+echo $ARCH | grep -qE "linux.*x86_64.*" && MBARCH="linux_amd64"
+echo $ARCH | grep -qE "linux.*x86_64.*" && MBARCH="linux_amd64"
+echo $ARCH | grep -qE "darwin.*x86_64.*" && MBARCH="darwin_amd64"
 cat << EOF
 =====================================================================================
 > 请在以下路径中选择一个合适的[工具箱安装位置],[二进制程序路径]和[用户数据目录]：
@@ -45,7 +49,6 @@ cat << EOF
 EOF
 
 [ ! -d "${MBTMP}" ] && mkdir -p ${MBTMP}
-df -h | sed 1d | awk '{print NR"."$6}'
 loginfo "请输入工具箱安装路径[可手动输入路径]：" 
 read MBROOT
 if [ -n "$(echo "$MBROOT" | grep -E "^[0-9][0-9]*$")" ]; then
@@ -54,6 +57,7 @@ else
 	[ -z "${MBROOT}" ] && loginfo "工具箱安装位置不能为空！" && exit 1
 	MBROOT=${MBROOT}/mixbox
 fi
+[ -d "${MBROOT}" ] && loginfo "文件夹${MBROOT}已存在！请检查工具箱是否已经安装！" && exit 1
 
 loginfo "请输入用户数据目录[可手动输入路径]：" 
 read MBDISK
@@ -75,6 +79,9 @@ tarsh ${MBTMP}/mixbox.tar.gz ${MBTMP}
 cp -rf ${MBTMP}/mixbox ${MBROOT}
 mv -f /tmp/helper.sh ${MBROOT}/lib
 chmod -R +x ${MBROOT}/*
+# 清楚安装文件
+rm -rf ${MBTMP}/mixbox.tar.gz
+rm -rf ${MBTMP}/mixbox
 
 loginfo "初始化工具箱配置信息..."
 mkdir ${MBROOT}/log
@@ -111,5 +118,4 @@ if type on_install &> /dev/null; then
 fi
 
 loginfo "工具箱安装完成!"
-rm -rf ${MBTMP}/mixbox.tar.gz
-rm -rf ${MBTMP}/mixbox
+

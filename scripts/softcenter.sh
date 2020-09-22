@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -euo pipefail
 #copyright by monlor
 source /etc/profile &> /dev/null
 source ${MBROOT}/bin/base

@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/sh -euo pipefail
 #copyright by monlor
 source /etc/profile &> /dev/null
 [ -z ${MBROOT} -o ! -d "${MBROOT}" ] && echo "未找到工具箱文件！" && exit 1
@@ -18,10 +18,7 @@ fi
 touch ${MBTMP}/mixbox_inited
 
 loginfo "检查环境变量配置"
-result=$(cat /etc/profile | grep -c mixbox/config)
-if [ "$result" == 0 ]; then
-	echo "source ${MBROOT}/config/mixbox.conf #mixbox" >> /etc/profile
-fi
+add_env_profile "source ${MBROOT}/config/mixbox.conf"
 
 loginfo "检查守护进程配置"
 cru d watch
@@ -34,7 +31,7 @@ loginfo "防火墙重启插件检查"
 firewall_restart_add "mixbox" "${MBROOT}/scripts/monitor.sh firewall.txt reload"
 
 loginfo "下载二进制程序..."
-download_binfile $MBINFILE
+download_binfile "${MBINFILE}" && exit 1
 ln -sf ${MBINROOT}/mixbox/* ${MBROOT}/bin
 
 if type on_init &> /dev/null; then
@@ -47,7 +44,7 @@ loginfo "执行工具箱插件监控脚本"
 ${MBROOT}/scripts/monitor.sh applist.txt watch
 
 loginfo "启动web服务程序..."
-${MBINROOT}/mixbox/shell2http -basic-auth ${MBUSER}:${MBPWD} -port 8088 -cgi -form /api/mixbox ${MBROOT}/scripts/shell2http.sh &> ${MBTMP}/shell2http.log &
+daemon_start ${MBROOT}/bin/shell2http -basic-auth ${MBUSER}:${MBPWD} -port 8088 -cgi -form /api/mixbox ${MBROOT}/scripts/shell2http.sh
 
 if [ -x "${MBROOT}/scripts/userscript.sh" ]; then
 	loginfo "运行用户自定义脚本"

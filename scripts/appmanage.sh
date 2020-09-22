@@ -1,13 +1,11 @@
-#!/bin/sh 
+#!/bin/sh -euo pipefail
 #copyright by monlor
 source /etc/profile &> /dev/null
 source ${MBROOT}/bin/base
 
 APPNAME="$1"
 ACTION="$2"
-LOGPATH="${MBROOT}/log/${APPNAME}.log"
-[ -z "${APPNAME}" ] && logerror "插件名不能为空！"
-[ -z "${ACTION}" ] && logerror "操作行为不能为空！"
+assert_nil APPNAME ACTION && exit 1
 
 source ${MBROOT}/apps/${APPNAME}/${APPNAME}.conf
 
