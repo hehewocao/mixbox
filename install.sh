@@ -8,10 +8,13 @@ echo "**            Welcome to MIXBOX !            **"
 echo "**                                           **"
 echo "***********************************************"
 MBURL="https://cdn.jsdelivr.net/gh/monlor/mixbox@latest"
-source <(curl -kfsSl ${MBURL}/config/mixbox.conf) || exit 1
+curl -kfsSlo /tmp/mixbox.conf ${MBURL}/config/mixbox.conf || exit 1
+source /tmp/mixbox.conf
 echo "兼容配置：[ ${MBHELPERS} ]"
 read -p "请输入设备兼容配置名[回车即default]：" helper
-source <(curl -kfsSl ${MBURL}/helpers/${helper:-default}.sh) || exit 1
+curl -kfsSlo /tmp/helper.sh ${MBURL}/helpers/${helper:-default}.sh || exit 1
+source /tmp/helper.sh
+rm -rf /tmp/helper.sh /tmp/mixbox.conf
 
 loginfo "请按任意键安装工具箱(Ctrl + C 退出)."
 read answer

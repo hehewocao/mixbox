@@ -12,8 +12,9 @@ UPGRADE=0
 install () {
 
 	loginfo "开始安装插件【$APPNAME】..."
-
-	source <(wgetlist ${MBINURL}/apps/${APPNAME}/${APPNAME}.conf) || logerror "加载远程配置文件失败！"
+	wgetsh ${MBTMP}/${APPNAME}.conf ${MBINURL}/apps/${APPNAME}/${APPNAME}.conf || logerror "加载远程配置文件失败！"
+	source ${MBTMP}/${APPNAME}.conf 
+	rm -rf ${MBTMP}/${APPNAME}.conf
 	echo ${supports} | tr ',' '\n' | grep -E "^${MODEL}$" &> /dev/null || logerror "设备架构：$MODEL，插件支持：$supports，无法安装！"
 	loginfo "检查工具箱版本..."
 	[ "$(versioncmp $MBVER $needver)" = '-1' ] && logerror "工具箱版本过低！【${APPNAME}】要求工具箱版本：$needver"	
