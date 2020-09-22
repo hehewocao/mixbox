@@ -1,5 +1,9 @@
 #!/bin/sh -e
 #copyright by monlor
+
+loginfo() {
+	echo 【$(TZ=UTC-8 date -R +%Y年%m月%d日\ %X)】: ${@}
+}
    
 clear
 echo "***********************************************"

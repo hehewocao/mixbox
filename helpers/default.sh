@@ -182,20 +182,3 @@ daemon_stop() {
 	loginfo "停止程序:$@"
 	killall -9 "$@" &> /dev/null
 }
-
-
-_log() {
-	local level=$1
-	shift 1
-	local logpath=${MBROOT}/log/${appname:-mixbox}.log
-	echo 【$(TZ=UTC-8 date -R +%Y年%m月%d日\ %X)】【${level}】: ${@} 2>&1 | tee -a ${logpath} 
-}
-
-loginfo() {
-	_log INFO "$@"
-}
-
-logerror() {
-	_log ERROR "$@"
-	exit 1
-}
