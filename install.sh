@@ -1,10 +1,6 @@
 #!/bin/sh -euo pipefail
 #copyright by monlor
-
-loginfo() {
-	echo 【$(TZ=UTC-8 date +%Y年%m月%d日\ %X)】【INFO】: "${@}"
-}
-
+alias loginfo='echo 【$(TZ=UTC-8 date +%Y年%m月%d日\ %X)】【INFO】:'
 alias logwarn='loginfo'
 alias logerror='loginfo'
    
@@ -18,10 +14,11 @@ loginfo "请按任意键安装工具箱(Ctrl + C 退出)."
 read answer
 
 MBURL="https://raw.githubusercontent.com/monlor/mixbox/master"
+loginfo "清理文件中..."
+rm -rf /tmp/mixbox.conf /tmp/helper.sh
 curl -kfsSlo /tmp/mixbox.conf ${MBURL}/config/mixbox.conf || exit 1
 source /tmp/mixbox.conf
-loginfo "清理文件中..."
-rm -rf ${MBTMP} /tmp/mixbox.conf /tmp/helper.sh
+rm -rf ${MBTMP} 
 
 loginfo "支持的兼容配置：[ ${MBHELPERS} ]"
 loginfo "请输入设备兼容配置名[回车即default]：" 

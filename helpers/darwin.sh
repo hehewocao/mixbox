@@ -175,5 +175,6 @@ daemon_stop() {
 general_cron_task() {
 	[ ! -f /etc/crontab ] && sudo mkdir /etc/crontab
 	sudo sed -i "" "/#mixbox/d" /etc/crontab
-	cat ${MBROOT}/config/crontab.txt | cut -d',' -f2 | sudo sed -e 's/$/ #mixbox/g' >> ${cronpath}
+	cat ${MBROOT}/config/crontab.txt | cut -d',' -f2 | sudo sed -e 's/$/ #mixbox/g' >> /etc/crontab
 }
+

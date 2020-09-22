@@ -1,6 +1,6 @@
 #!/bin/sh -euo pipefail
 #copyright by monlor
-source /etc/mixbox.conf
+source /tmp/mixbox.conf
 source ${MBROOT}/bin/base
 
 APPNAME="$1"

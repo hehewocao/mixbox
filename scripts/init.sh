@@ -4,7 +4,7 @@ MBROOT="${1}"
 [ -z ${MBROOT} -o ! -d "${MBROOT}" ] && echo "请传入工具箱目录参数或未找到工具箱文件！" && exit 1
 
 source ${MBROOT}/config/mixbox.conf
-source ${MBROOT}/bin/base
+source ${MBROOT}/bin/base init
 
 loginfo "工具箱初始化脚本启动..."
 
@@ -19,7 +19,7 @@ fi
 touch ${MBTMP}/mixbox_inited
 
 loginfo "检查环境变量配置"
-[ ! -f /etc/mixbox.conf ] && ln -sf ${MBROOT}/conf/mixbox.conf
+ln -sf ${MBROOT}/config/mixbox.conf /tmp/mixbox.conf 
 
 loginfo "检查守护进程配置"
 cru d watch

@@ -1,6 +1,8 @@
 #!/bin/sh 
 #copyright by monlor
-[ -f /etc/mixbox.conf ] && source /etc/mixbox.conf
+if [ "${1}" != "init" ]; then
+	source /tmp/mixbox.conf || exit 1
+fi
 export PATH=${MBROOT}/bin:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 source ${MBROOT}/lib/helper.sh
 source ${MBROOT}/lib/jshn.sh
@@ -32,7 +34,7 @@ _log() {
 	local level=$1
 	shift 1
 	local logpath=${MBROOT}/log/${appname:-mixbox}.log
-	echo 【$(TZ=UTC-8 date -R +%Y年%m月%d日\ %X)】【${level}】: ${@} 2>&1 | tee -a ${logpath} 
+	echo 【$(TZ=UTC-8 date +%Y年%m月%d日\ %X)】【${level}】: ${@} 2>&1 | tee -a ${logpath} 
 }
 
 loginfo() {
