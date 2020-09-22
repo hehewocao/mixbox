@@ -1,6 +1,6 @@
 #!/bin/sh 
 #copyright by monlor
-source /etc/mixbox.conf
+[ -f /etc/mixbox.conf ] && source /etc/mixbox.conf
 export PATH=${MBROOT}/bin:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 source ${MBROOT}/lib/helper.sh
 source ${MBROOT}/lib/jshn.sh
