@@ -59,7 +59,7 @@ pc_delete_line() {
 }
 
 wgetsh() {
-	# 传入下载的文件位置和下载地址，自动下载到${mbtmp}，若成功则移到下载位置
+	# 传入下载的文件位置和下载地址，自动下载到${MBTMP}，若成功则移到下载位置
 	[ -z "$1" -o -z "$2" ] && return 1
 	[ -x /opt/bin/curl ] && alias curl=/opt/bin/curl
 	local wgetfilepath="$1"
@@ -67,20 +67,20 @@ wgetsh() {
 	local wgetfiledir=$(dirname $wgetfilepath)
 	local wgeturl="$2"
 	[ ! -d "$wgetfiledir" ] && mkdir -p $wgetfiledir
-	[ ! -d ${mbtmp} ] && mkdir -p ${mbtmp}
-	rm -rf ${mbtmp}/${wgetfilename}
+	[ ! -d ${MBTMP} ] && mkdir -p ${MBTMP}
+	rm -rf ${MBTMP}/${wgetfilename}
 	if command -v curl &> /dev/null; then
-		result1=$(curl -skL --connect-timeout 10 -m 20 -w %{http_code} -o "${mbtmp}/${wgetfilename}" "$wgeturl")
+		result1=$(curl -skL --connect-timeout 10 -m 20 -w %{http_code} -o "${MBTMP}/${wgetfilename}" "$wgeturl")
 	else
-		wget-ssl -q --no-check-certificate --tries=1 --timeout=10 -O "${mbtmp}/${wgetfilename}" "$wgeturl"
+		wget-ssl -q --no-check-certificate --tries=1 --timeout=10 -O "${MBTMP}/${wgetfilename}" "$wgeturl"
 		[ $? -eq 0 ] && result1="200"
 	fi
 	if [ "$result1" = "200" ]; then
-		chmod +x ${mbtmp}/${wgetfilename} > /dev/null 2>&1
-		mv -f ${mbtmp}/${wgetfilename} $wgetfilepath > /dev/null 2>&1
+		chmod +x ${MBTMP}/${wgetfilename} > /dev/null 2>&1
+		mv -f ${MBTMP}/${wgetfilename} $wgetfilepath > /dev/null 2>&1
 		return 0
 	else
-		rm -rf ${mbtmp}/${wgetfilename}
+		rm -rf ${MBTMP}/${wgetfilename}
 		logwarn "下载文件失败：${wgeturl}"
 		return 1
 	fi
