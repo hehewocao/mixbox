@@ -1,6 +1,6 @@
 #!/bin/sh -e
 #copyright by monlor
-source /etc/profile &> /dev/null
+source /etc/mixbox.conf
 source ${MBROOT}/lib/helper.sh
 
 # 添加定时任务，利用uci来储存信息，cru {a|d|c} [name] [crontab] 

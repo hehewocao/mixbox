@@ -1,6 +1,6 @@
 #!/bin/sh 
 #copyright by monlor
-source /etc/profile &> /dev/null
+source /etc/mixbox.conf
 source ${MBROOT}/bin/base
 source ${MBROOT}/lib/jsonutil.sh
 

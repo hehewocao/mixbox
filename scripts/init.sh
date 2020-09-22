@@ -1,8 +1,9 @@
 #!/bin/sh -euo pipefail
 #copyright by monlor
-source /etc/profile &> /dev/null
-[ -z ${MBROOT} -o ! -d "${MBROOT}" ] && echo "未找到工具箱文件！" && exit 1
+MBROOT="${1}"
+[ -z ${MBROOT} -o ! -d "${MBROOT}" ] && echo "请传入工具箱目录参数或未找到工具箱文件！" && exit 1
 
+source ${MBROOT}/config/mixbox.conf
 source ${MBROOT}/bin/base
 
 loginfo "工具箱初始化脚本启动..."
@@ -18,14 +19,14 @@ fi
 touch ${MBTMP}/mixbox_inited
 
 loginfo "检查环境变量配置"
-add_env_profile "source ${MBROOT}/config/mixbox.conf"
+[ ! -f /etc/mixbox.conf ] && ln -sf ${MBROOT}/conf/mixbox.conf
 
 loginfo "检查守护进程配置"
 cru d watch
 cru a watch "*/10 * * * * ${MBROOT}/scripts/monitor.sh watch.txt watch"
 
 loginfo "添加工具箱开机启动配置"
-power_boot_add "mixbox" ${MBROOT}/scripts/init.sh
+power_boot_add "mixbox" "${MBROOT}/scripts/init.sh ${MBROOT}"
 
 loginfo "防火墙重启插件检查"
 firewall_restart_add "mixbox" "${MBROOT}/scripts/monitor.sh firewall.txt reload"

@@ -20,11 +20,13 @@ read answer
 MBURL="https://raw.githubusercontent.com/monlor/mixbox/master"
 curl -kfsSlo /tmp/mixbox.conf ${MBURL}/config/mixbox.conf || exit 1
 source /tmp/mixbox.conf
-rm -rf /tmp/mixbox.conf
+loginfo "清理文件中..."
+rm -rf ${MBTMP} /tmp/mixbox.conf /tmp/helper.sh
 
 loginfo "支持的兼容配置：[ ${MBHELPERS} ]"
 loginfo "请输入设备兼容配置名[回车即default]：" 
 read helper
+!(echo ${MBHELPERS} | tr ',' '\n' | grep -Eq "^${helper:=default}$") && loginfo "输入有误！" && exit 1
 curl -kfsSlo /tmp/helper.sh ${MBURL}/helpers/${helper:-default}.sh || exit 1
 source /tmp/helper.sh
 [ ! -d "${MBTMP}" ] && mkdir -p ${MBTMP}
@@ -48,24 +50,18 @@ cat << EOF
 EOF
 
 [ ! -d "${MBTMP}" ] && mkdir -p ${MBTMP}
-loginfo "请输入工具箱安装路径[可手动输入路径]：" 
+loginfo "请输入工具箱安装路径：" 
 read MBROOT
-if [ -n "$(echo "$MBROOT" | grep -E "^[0-9][0-9]*$")" ]; then
-	MBROOT="$(df -h | sed 1d | awk '{print $6}' | sed -n "$MBROOT"p)/mixbox"
-else
-	[ -z "${MBROOT}" ] && loginfo "工具箱安装位置不能为空！" && exit 1
-	MBROOT=${MBROOT}/mixbox
-fi
-[ -d "${MBROOT}" ] && loginfo "文件夹${MBROOT}已存在！请检查工具箱是否已经安装！" && exit 1
+[ -z "${MBROOT}" -o ! -d "${MBROOT}" ] && loginfo "工具箱安装位置不能为空或目录不存在！" && exit 1
+MBROOT=${MBROOT}/mixbox
 
-loginfo "请输入用户数据目录[可手动输入路径]：" 
+[ -d "${MBROOT}" ] && loginfo "工具箱文件夹${MBROOT}已存在！请检查工具箱是否已经安装！" && exit 1
+
+loginfo "请输入用户数据目录：" 
 read MBDISK
-if [ -n "$(echo "$MBDISK" | grep -E "^[0-9][0-9]*$")" ]; then
-	MBDISK="$(df -h | sed 1d | awk '{print $6}' | sed -n "$MBDISK"p)"
-fi
-[ -z "${MBDISK}" ] && loginfo "用户数据目录不能为空！" && exit 1
+[ -z "${MBDISK}" -o ! -d "${MBDISK}" ] && loginfo "用户数据目录不能为空或目录不存在！" && exit 1
 
-loginfo "请输入二进制程序路径[回车即${MBROOT}/apps][可手动输入路径]：" 
+loginfo "请输入二进制程序路径[回车即${MBROOT}/apps]：" 
 read MBINROOT
 MBINROOT=${MBINROOT:-${MBROOT}/apps}
 
@@ -106,10 +102,7 @@ MBPWD="${MBPWD}"
 EOF
 
 loginfo "执行工具箱初始化脚本..."
-export MBROOT=${MBROOT}
-export MBTMP=${MBTMP}
-export MBINROOT=${MBINROOT}
-${MBROOT}/scripts/init.sh
+${MBROOT}/scripts/init.sh ${MBROOT}
 
 if type on_install &> /dev/null; then
 	loginfo "触发安装帮助脚本..."

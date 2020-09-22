@@ -155,23 +155,25 @@ daemon_stop() {
 	killall -9 "$@" &> /dev/null
 }
 
-add_env_profile() {
-	[ -z "${1}" ] && logwarn "add_env_profile参数不能为空！" && return 1
-	if cat /etc/profile | grep -q "${1}"; then
-		logwarn "环境变量配置已添加！"
-		return 1
-	fi
-	sudo echo "${1} #mixbox" >> /etc/profile
-}
+# add_env_profile() {
+# 	[ -z "${1}" ] && logwarn "add_env_profile参数不能为空！" && return 1
+# 	if cat ~/.bash_profile | grep -q "${1}"; then
+# 		logwarn "环境变量配置已添加！"
+# 		return 1
+# 	fi
+# 	echo "${1} #mixbox" >> ~/.bash_profile
+# 	[ -f ~/.zshrc ] && echo "${1} #mixbox" >> ~/.zshrc
+# }
 
-del_env_profile() {
-	[ -z "${1}" ] && logwarn "add_env_profile参数不能为空！" && return 1
-  PATTERN=$(_quote "$1")
-	sudo sed -i "" "/$PATTERN/d" /etc/profile
-}
+# del_env_profile() {
+# 	[ -z "${1}" ] && logwarn "add_env_profile参数不能为空！" && return 1
+#   PATTERN=$(_quote "$1")
+# 	sed -i "" "/$PATTERN/d" ~/.bash_profile
+# 	[ -f ~/.zshrc ] && sed -i "" "/$PATTERN/d" ~/.zshrc
+# }
 
 general_cron_task() {
-	[ ! -d /etc/crontab ] && sudo mkdir /etc/crontab
+	[ ! -f /etc/crontab ] && sudo mkdir /etc/crontab
 	sudo sed -i "" "/#mixbox/d" /etc/crontab
 	cat ${MBROOT}/config/crontab.txt | cut -d',' -f2 | sudo sed -e 's/$/ #mixbox/g' >> ${cronpath}
 }

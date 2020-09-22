@@ -183,19 +183,19 @@ daemon_stop() {
 	killall -9 "$@" &> /dev/null
 }
 
-add_env_profile() {
-	[ -z "${1}" ] && logwarn "add_env_profile参数不能为空！" && return 1
-	if cat /etc/profile | grep -q "${1}"; then
-		logwarn "环境变量配置已添加！"
-		return 1
-	fi
-	echo "${1} #mixbox" >> /etc/profile
-}
+# add_env_profile() {
+# 	[ -z "${1}" ] && logwarn "add_env_profile参数不能为空！" && return 1
+# 	if cat /etc/profile | grep -q "${1}"; then
+# 		logwarn "环境变量配置已添加！"
+# 		return 1
+# 	fi
+# 	echo "${1} #mixbox" >> /etc/profile
+# }
 
-del_env_profile() {
-	[ -z "${1}" ] && logwarn "add_env_profile参数不能为空！" && return 1
-	pc_delete "${1} #mixbox" /etc/profile
-}
+# del_env_profile() {
+# 	[ -z "${1}" ] && logwarn "add_env_profile参数不能为空！" && return 1
+# 	pc_delete "${1} #mixbox" /etc/profile
+# }
 
 general_cron_task() {
 	# 使定时任务生效
