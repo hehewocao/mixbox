@@ -17,17 +17,16 @@ loginfo "***********************************************"
 loginfo "请按任意键安装工具箱(Ctrl + C 退出)."
 read answer
 
-cp helpers/darwin.sh /tmp/helper.sh 
-cp config/mixbox.conf /tmp/mixbox.conf
-# MBURL="https://raw.githubusercontent.com/monlor/mixbox/master"
-# curl -kfsSlo /tmp/mixbox.conf ${MBURL}/config/mixbox.conf || exit 1
+MBURL="https://raw.githubusercontent.com/monlor/mixbox/master"
+curl -kfsSlo /tmp/mixbox.conf ${MBURL}/config/mixbox.conf || exit 1
 source /tmp/mixbox.conf
-# loginfo "支持的兼容配置：[ ${MBHELPERS} ]"
-# loginfo "请输入设备兼容配置名[回车即default]：" 
-# read helper
-# curl -kfsSlo /tmp/helper.sh ${MBURL}/helpers/${helper:-default}.sh || exit 1
+rm -rf /tmp/mixbox.conf
+
+loginfo "支持的兼容配置：[ ${MBHELPERS} ]"
+loginfo "请输入设备兼容配置名[回车即default]：" 
+read helper
+curl -kfsSlo /tmp/helper.sh ${MBURL}/helpers/${helper:-default}.sh || exit 1
 source /tmp/helper.sh
-# rm -rf /tmp/mixbox.conf
 [ ! -d "${MBTMP}" ] && mkdir -p ${MBTMP}
 
 ARCH=$(uname -ms | tr ' ' '_' | tr '[A-Z]' '[a-z]')
