@@ -7,7 +7,7 @@ echo "**                                           **"
 echo "**            Welcome to MIXBOX !            **"
 echo "**                                           **"
 echo "***********************************************"
-MBURL="https://cdn.jsdelivr.net/gh/monlor/mixbox@latest"
+MBURL="https://raw.githubusercontent.com/monlor/mixbox/master"
 curl -kfsSlo /tmp/mixbox.conf ${MBURL}/config/mixbox.conf || exit 1
 source /tmp/mixbox.conf
 echo "支持的兼容配置：[ ${MBHELPERS} ]"
