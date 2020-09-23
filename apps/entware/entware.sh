@@ -8,7 +8,7 @@ init_entware() {
 		case "${MBARCH}" in 
 			linux_armv7) [ "$(uname -r | cut -d'.' -f1)" -ge '3' ] && ins_mode=armv7sf-k3.2 || ins_mode=armv7sf-k2.6 ;;
 			linux_mipsle) ins_mode=mipselsf-k3.4 ;;
-			linux_x86_64) ins_mode=x64-k3.2 ;;
+			linux_amd64) ins_mode=x64-k3.2 ;;
 			linux_aarch64) ins_mode=aarch64-k3.10 ;;
 			*) logerror "暂不支持你的设备型号${MBARCH}" && exit 1 ;;
 		esac

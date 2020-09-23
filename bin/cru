@@ -1,7 +1,7 @@
 #!/bin/sh -euo pipefail
 #copyright by monlor
 source /tmp/mixbox.conf
-source ${MBROOT}/lib/helper.sh
+source ${MBROOT}/bin/base
 
 # 添加定时任务，利用uci来储存信息，cru {a|d|c} [name] [crontab] 
 method="$1"

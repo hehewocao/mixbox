@@ -164,6 +164,10 @@ daemon_start() {
 	loginfo "启动程序:${1}..."
 	local binname="$(basename "${1}")"
 	local res=0
+	local appname=${appname:-mixbox}
+	if pidsh ${binname} &> /dev/null; then
+    logwarn "${binname}已经启动！"
+  fi
 	if type nohup &>/dev/null; then 
 		nohup ${MBINROOT}/${appname}/$@ >> ${MBLOG}/${appname}.log 2>&1 &
 		res=$?
@@ -213,4 +217,8 @@ general_cron_task() {
 	pc_delete "#mixbox" ${cronpath} &> /dev/null
 	cat ${MBROOT}/config/crontab.txt | cut -d',' -f2 | sed -e 's/$/ #mixbox/g' >> ${cronpath}
 
+}
+
+pidsh() {
+	pidof "${1}"
 }

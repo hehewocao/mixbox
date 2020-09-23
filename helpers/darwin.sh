@@ -12,6 +12,10 @@ on_init() {
 	return
 }
 
+pidsh() {
+  ps ax | grep shell2http | grep -v grep | awk '{print$1}'
+}
+
 _quote() {
 	# 不转换
 	[ "${skip_quote:-0}" -eq 1 ] && echo $1 && return
@@ -136,6 +140,10 @@ daemon_start() {
 	loginfo "启动程序:${1}..."
 	local binname="$(basename "${1}")"
 	local res=0
+  local appname=${appname:-mixbox}
+  if pidsh ${binname} &> /dev/null; then
+    logwarn "${binname}已经启动！"
+  fi
 	if type nohup &>/dev/null; then 
 		nohup ${MBINROOT}/${appname}/$@ >> ${MBLOG}/${appname}.log 2>&1 &
 		res=$?
@@ -174,9 +182,8 @@ daemon_stop() {
 
 general_cron_task() {
   loginfo "${MODEL}暂时手动添加以下定时任务！"
-  cat ${MBROOT}/config/crontab.txt
+  logexe "cat ${MBROOT}/config/crontab.txt | cut -d',' -f2"
 	# [ ! -f /etc/crontab ] && sudo mkdir /etc/crontab
 	# sudo sed -i "" "/#mixbox/d" /etc/crontab
 	# cat ${MBROOT}/config/crontab.txt | cut -d',' -f2 | sudo sed -e 's/$/ #mixbox/g' >> /etc/crontab
 }
-

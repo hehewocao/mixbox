@@ -14,7 +14,7 @@ source ${MBROOT}/apps/${APPNAME}/${APPNAME}.sh
 _is_running() {
 	local flag=0
 	for i in "$@"; do
-		!(pidof "${i}" &> /dev/null) && flag=1 && break
+		!(pidsh "${i}" &> /dev/null) && flag=1 && break
 	done
 	return ${flag}
 }

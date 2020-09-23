@@ -11,17 +11,17 @@ UPGRADE=0
 
 install () {
 
-	loginfo "开始安装插件【$APPNAME】..."
-	wgetsh ${MBTMP}/${APPNAME}.conf ${MBINURL}/apps/${APPNAME}/${APPNAME}.conf || logerror "加载远程配置文件失败！"
+	loginfo "开始安装插件【${APPNAME}】..."
+	wgetsh ${MBTMP}/${APPNAME}.conf ${MBURL}/apps/${APPNAME}/${APPNAME}.conf || logerror "加载远程配置文件失败！"
 	source ${MBTMP}/${APPNAME}.conf 
 	rm -rf ${MBTMP}/${APPNAME}.conf
-	echo ${supports} | tr ',' '\n' | grep -E "^${MODEL}$" &> /dev/null || logerror "设备架构：$MODEL，插件支持：$supports，无法安装！"
+	echo ${supports} | tr ',' '\n' | grep -E "^${MBARCH}$" &> /dev/null || logerror "设备架构：${MBARCH}，插件支持：${supports}，无法安装！"
 	loginfo "检查工具箱版本..."
-	[ "$(versioncmp $MBVER $needver)" = '-1' ] && logerror "工具箱版本过低！【${APPNAME}】要求工具箱版本：$needver"	
-	loginfo "工具箱版本[$MBVER]满足安装要求"
+	[ "$(versioncmp ${MBVER} ${needver})" = '-1' ] && logerror "工具箱版本过低！【${APPNAME}】要求工具箱版本：${needver}"	
+	loginfo "工具箱版本[${MBVER}]满足安装要求"
 
 	loginfo "下载插件安装文件..."
-	wgetsh "${MBTMP}/${APPNAME}.tar.gz" "$MBINURL/${APPNAME}/${APPNAME}.tar.gz" || logerror "文件下载失败！"
+	wgetsh "${MBTMP}/${APPNAME}.tar.gz" "${MBINURL}/${APPNAME}/${APPNAME}.tar.gz" || logerror "文件下载失败！"
 	loginfo "解压安装文件..."
 	tarsh ${MBTMP}/${APPNAME}.tar.gz ${MBTMP} || logerror "文件解压失败！"
 	loginfo "赋予可执行文件..."
