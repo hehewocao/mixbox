@@ -44,6 +44,7 @@ start () {
 stop () {
 
 	loginfo "正在停止${appname}服务... "
+	/opt/etc/init.d/rc.unslung stop &> /dev/null
 	[ -d /opt/bin ] && umountsh /opt
 	del_lib_path "/opt/lib" 
 	del_env_path "/opt/bin:/opt/sbin" 

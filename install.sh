@@ -1,4 +1,4 @@
-#!/bin/sh -euo pipefail
+#!/bin/sh -eu
 #copyright by monlor
 alias loginfo='echo 【$(TZ=UTC-8 date +%Y年%m月%d日\ %X)】【INFO】:'
 alias logwarn='loginfo'

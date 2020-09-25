@@ -1,4 +1,4 @@
-#!/bin/sh -euo pipefail
+#!/bin/sh -eu
 #copyright by monlor
 MBROOT="${1}"
 [ -z ${MBROOT} -o ! -d "${MBROOT}" ] && echo "请传入工具箱目录参数或未找到工具箱文件！" && exit 1

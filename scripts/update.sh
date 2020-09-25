@@ -1,4 +1,4 @@
-#!/bin/sh -euo pipefail
+#!/bin/sh -eu
 #copyright by monlor
 source /tmp/mixbox.conf
 source ${MBROOT}/bin/base
