@@ -13,7 +13,8 @@ loginfo "***********************************************"
 loginfo "请按任意键安装工具箱(Ctrl + C 退出)."
 read answer
 
-MBURL="https://raw.githubusercontent.com/monlor/mixbox/master"
+# MBURL="https://raw.githubusercontent.com/monlor/mixbox/master"
+MBURL="https://cdn.jsdelivr.net/gh/monlor/mixbox@latest"
 loginfo "清理文件中..."
 rm -rf /tmp/mixbox.conf /tmp/helper.sh
 curl -kfsSlo /tmp/mixbox.conf ${MBURL}/config/mixbox.conf || exit 1
