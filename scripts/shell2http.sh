@@ -5,7 +5,7 @@ source ${MBROOT}/bin/base
 source ${MBROOT}/lib/jsonutil.sh
 
 if [ -n "${v_appname}" ]; then
-  source ${MBROOT}/apps/${v_appname}/${v_appname}.sh
+  source ${MBROOT}/apps/${v_appname}/http.sh
 fi
 
 http_error() {

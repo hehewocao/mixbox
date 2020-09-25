@@ -10,40 +10,35 @@ assert_nil APPNAME ACTION && exit 1
 source ${MBROOT}/apps/${APPNAME}/${APPNAME}.conf
 
 source ${MBROOT}/apps/${APPNAME}/${APPNAME}.sh
-
 _is_running() {
-	local flag=0
-	for i in "$@"; do
-		!(pidsh "${i}" &> /dev/null) && flag=1 && break
-	done
-	return ${flag}
-}
-
-_running() {
-	res="运行中"
-	[ -n "${port}" ] && res="${res}，端口号：${port}"
-	echo ${res}
-	return 0
-}
-
-_stopped() {
-	res="未运行"
-	echo ${res}
-	return 1
+	if [ -z "$@" ]; then 
+		is_running
+		return $?
+	else
+		for i in "$@"; do
+			pidsh "${i}" &> /dev/null || return 1
+		done
+		return 0
+	fi
 }
 
 check_running() {
-	local flag=1
-	[ -z "$@" ] && flag=$(is_running; echo $?) || flag=$(_is_running "$@"; echo $?)
-	[ ${flag} -eq 0 ] && loginfo "插件${appname}已经在运行！" && return 0
+	_is_running "$@" && loginfo "插件${appname}已经在运行！" && return 0
 	return 1
 }
 
 # 传入二进制程序参数，则检查是否运行；不传入则取插件脚本中的is_running变量
 default_status() {
-	local flag=1
-	[ -z "$@" ] && flag=$(is_running; echo $?) || flag=$(_is_running "$@"; echo $?)
-	[ ${flag} -eq 0 ] && _running || _stopped
+	local res="运行中"
+	if _is_running "$@"; then
+		[ -n "${port}" ] && res="${res}，端口号：${port}"
+		echo ${res}
+		return 0
+	else
+		res="未运行"
+		echo ${res}
+		return 1
+	fi
 }
 
 status_app() {
@@ -68,21 +63,12 @@ watch() {
 	fi
 }
 
-check_port() {
-	[ -z ${port} ] && return
-	for i in `echo ${port} | tr ',' '\n'`;do
-		if [ -n "$(netstat -ntulp | grep :${i})" ]; then
-			logwarn "检测到端口：${i} 被以下进程占用！clash无法启动！" 
-			logerror "$(netstat -ntulp |grep :${i})"
-		fi
-	done
-}
-
 start_app() {
 	check_port
 	# check binfile
 	download_binfile ${binfile} || exit 1
 	start
+	sleep 1
 	status_app &> /dev/null || logerror "服务启动失败！"
 }
 

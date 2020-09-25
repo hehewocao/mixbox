@@ -12,6 +12,10 @@ on_init() {
 	[ ! -d /tmp/etc/dnsmasq.d ] && mkdir /tmp/etc/dnsmasq.d
 }
 
+pidsh() {
+	pidof "${1}"
+}
+
 _quote() {
 	# 不转换
 	[ "${skip_quote:-0}" -eq 1 ] && echo $1 && return
@@ -219,6 +223,30 @@ general_cron_task() {
 
 }
 
-pidsh() {
-	pidof "${1}"
+check_port() {
+	[ -z ${port} ] && return
+	for i in `echo ${port} | tr ',' '\n'`;do
+		if [ -n "$(netstat -ntulp | grep :${i})" ]; then
+			logwarn "检测到端口：${i} 被以下进程占用！clash无法启动！" 
+			logerror "$(netstat -ntulp |grep :${i})"
+		fi
+	done
+}
+
+
+open_port () {
+	[ -z "$1" ] && logerror "开放端口不能为空！"
+	local port="$1"
+	local protocol=${2:-tcp}
+	loginfo "开放端口[${port}]/${protocol}"
+	if [ -n "$(echo ${port} | grep ',')" ]; then
+		iptables -I INPUT -p "${protocol}" -m multiport --dport "${port}" -m comment --comment "mixbox-${appname}" -j ACCEPT 
+	else
+		iptables -I INPUT -p "${protocol}" --dport "${port}" -m comment --comment "mixbox-${appname}" -j ACCEPT 
+	fi
+}
+
+close_port () {
+	loginfo "关闭端口插件${appname}所有端口..."
+	eval `iptables -S | grep "mixbox-${appname}" | sed -e 's/-A/iptables -D/g' | sed -e 's/\$/;/g'`
 }

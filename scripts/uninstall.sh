@@ -13,7 +13,6 @@ loginfo "删除定时任务"
 cru c 
 
 loginfo "删除所有工具箱配置信息"
-del_env_profile "#mixbox"
 
 power_boot_del "mixbox"
 

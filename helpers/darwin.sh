@@ -13,7 +13,12 @@ on_init() {
 }
 
 pidsh() {
-  ps ax | grep shell2http | grep -v grep | awk '{print$1}'
+  local res=`ps ax | grep "${MBINROOT}/${appname:-mixbox}/${1}" | grep -v grep | awk '{print$1}'`
+  if [ -n "${res}" ]; then
+    echo ${res}
+    return 0
+  fi
+  return 1
 }
 
 _quote() {
@@ -107,7 +112,8 @@ tarsh() {
 }
 
 power_boot_add() {
-	logwarn "${MODEL}开启启动待完善！"
+	logwarn "${MODEL}开启启动待完善！请手动添加以下命令到开机启动！"
+  loginfo "${2}"
 }
 
 power_boot_del() {
@@ -186,4 +192,24 @@ general_cron_task() {
 	# [ ! -f /etc/crontab ] && sudo mkdir /etc/crontab
 	# sudo sed -i "" "/#mixbox/d" /etc/crontab
 	# cat ${MBROOT}/config/crontab.txt | cut -d',' -f2 | sudo sed -e 's/$/ #mixbox/g' >> /etc/crontab
+}
+
+check_port() {
+	[ -z ${port} ] && return
+	for i in `echo ${port} | tr ',' '\n'`;do
+		if netstat -AaLlnW | grep -E ".${i}[ ]" &> /dev/null; then
+			logwarn "检测到端口：${i} 被以下进程占用！clash无法启动！" 
+			logerror "$(netstat -AaLlnW | grep -E ".${i}[ ]")"
+		fi
+	done
+}
+
+
+open_port () {
+	[ -z "$1" ] && logerror "开放端口不能为空！"
+	loginfo "${MODEL}关闭防火墙即可！"
+}
+
+close_port () {
+	return
 }
