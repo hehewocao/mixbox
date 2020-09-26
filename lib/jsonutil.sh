@@ -1,7 +1,7 @@
 # source base [needed]
 
 json_add_var() {
-	if echo "${1}" | grep -Eq 'bool|Bool|enable|disable'; then
+	if echo "${1}" | grep -Eq 'bool|Bool|enable|disable|Status'; then
 		json_add_boolean "${1}" "${2}"
 	else
 		json_add_string "${1}" "${2}"
@@ -24,12 +24,13 @@ json_to_var() {
 # a=1 b=2 => { "a": "1", "b": "2" }
 var_to_json() {
 	[ $# -eq 0 ] && logerror "参数不能为空！"
+	local delimiter="${delimiter:-,}"
 	json_init
 	for key in $@; do
 		value="$(parse_str "${key}")"
 		if echo ${key} | grep -Eq 's$'; then
 			json_add_array "${key}"
-			for i in `echo "${value}" | tr ',' '\n'`; do
+			for i in `echo "${value}" | tr "${delimiter}" '\n'`; do
 				json_add_var "" "${i}"
 			done
 			json_close_array
@@ -56,6 +57,7 @@ var_add_to_json() {
 config_to_json_obj() {
 	local config="${1}"
 	local out="${2}"
+	local delimiter="${delimiter:-,}"
 	local key value
 	[ ! -f "${config}" ] && logerror "配置文件不存在！"
 	json_init
@@ -65,7 +67,7 @@ config_to_json_obj() {
 		value=`echo ${line} | cut -d'=' -f2- | sed -E "s/(^\"|\"$)//g"`
 		if echo ${key} | grep -Eq 's$'; then
 			json_add_array "${key}"
-			for i in `echo "${value}" | tr ',' '\n'`; do
+			for i in `echo "${value}" | tr "${delimiter}" '\n'`; do
 				json_add_var "" "${i}"
 			done
 			json_close_array
@@ -80,6 +82,7 @@ config_to_json_obj() {
 json_obj_to_config() {
 	local json="${1}"
 	local out="${2}"
+	local delimiter="${delimiter:-,}"
 	[ -z "${json}" ] && logerror "json不能为空！"
 	json_load "${json}"
 	json_get_keys keys
@@ -91,9 +94,9 @@ json_obj_to_config() {
 			vs=""
 			while json_get_type type ${index} && [ "${type}" = "string" ]; do
 				json_get_var v $((index++))
-				vs=${vs},${v}
+				vs=${vs}${delimiter}${v}
 			done
-			vs=`echo ${vs} | sed -E 's/^,//'`
+			vs=`echo ${vs} | sed -E "s/^${delimiter}//"`
 			json_select ".."
 		else
 			json_get_var vs "$k"
@@ -106,9 +109,10 @@ json_obj_to_config() {
 config_to_json_array() {
 	local config="${1}"
 	local out="${2}"
+	local delimiter="${delimiter:-|}"
 	[ ! -f "${config}" ] && logerror "配置文件不存在！"
 	local head=`cat ${config} | head -1`
-	local count=`echo ${head} | tr ',' '\n' | wc -l`
+	local count=`echo ${head} | tr "${delimiter}" '\n' | wc -l`
 	json_init
 	# 获取文件名称，根据配置文件名称构建数组
 	json_add_array "$(basename ${config} | cut -d'.' -f1)"
@@ -128,6 +132,7 @@ config_to_json_array() {
 json_array_to_config() {
 	local json="${1}"
 	local out="${2}"
+	local delimiter="${delimiter:-|}"
 	[ -z "${json}" ] && logerror "json不能为空！"
 	json_load "${json}"
 	json_get_keys keys
@@ -145,12 +150,12 @@ json_array_to_config() {
 				for attr in $attrs; do
 					json_get_var v $attr
 					vs=${vs},${v}
-					[ "${headout}" -eq 0 ] && head=${head},${attr}
+					[ "${headout}" -eq 0 ] && head=${head}${delimiter}${attr}
 				done
-				vs=`echo ${vs} | sed -E 's/^,//'`
+				vs=`echo ${vs} | sed -E "s/^${delimiter}//"`
 				# 输出标题
 				if [ "${headout}" -eq 0 ]; then
-					head=`echo ${head} | sed -E 's/^,//'`
+					head=`echo ${head} | sed -E "s/^${delimiter}//"`
 					[ -n "${out}" ] && echo "${head}" >> ${out} || echo "${head}"
 					headout=1
 				fi

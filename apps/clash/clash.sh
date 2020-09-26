@@ -36,7 +36,7 @@ start() {
     loginfo "安装本地面板..."
     wgetsh ${MBTMP}/clashdb.tar.gz ${MBINURL}/${appname}/clashdb.tar.gz || exit 1
     mkdir ${MBROOT}/apps/${appname}/ui
-    tarsh ${MBTMP}/clashdb.tar.gz -C ${MBROOT}/apps/${appname}/ui
+    tarsh ${MBTMP}/clashdb.tar.gz ${MBROOT}/apps/${appname}/ui || rm -rf ${MBROOT}/apps/${appname}/ui
     pc_replace "9090" "9999" ${MBROOT}/apps/${appname}/ui/js/*.js
   fi
   pc_replace "127.0.0.1" "${LANIP}" ${MBROOT}/apps/${appname}/ui/js/*.js

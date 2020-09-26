@@ -12,7 +12,7 @@ signin() {
   wgetsh ${JD_SCRIPT} ${remote_url} 
   pc_replace "var Key.*" "var Key = '$cookie';" $JD_SCRIPT
   loginfo "开始执行签到任务..."
-  daemon_start node $JD_SCRIPT
+  logexe node $JD_SCRIPT
 }
 
 start() {
@@ -30,5 +30,5 @@ stop() {
 }
 
 is_running() {
-  return `test "${enabled:-0}" -eq 1`
+  test "${enabled:-0}" -eq 1
 }

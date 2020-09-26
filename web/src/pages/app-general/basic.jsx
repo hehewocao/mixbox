@@ -6,10 +6,10 @@ import {useGet} from 'src/commons/ajax';
 
 export default function (props) {
 
-    const { loading, submit, data, formProps, form, formData } = props;
+    const { submit, data, formProps, form, formData } = props;
 
     return (
-        <PageContent loading={loading}>
+        <PageContent>
             <Form
                 name="form"
                 form={form}

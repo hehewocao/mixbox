@@ -1,7 +1,7 @@
-#!/bin/sh -eu
+#!/bin/sh 
 #copyright by monlor
 source /tmp/mixbox.conf
-source ${MBROOT}/bin/base
+source ${MBROOT}/bin/base || exit 1
 
 APPNAME="$1"
 ACTION="$2"
@@ -51,7 +51,7 @@ status_app() {
  
 restart() {
 	loginfo "======================="
-	stop_app
+	stop_app || true
 	sleep 1
 	start_app
 	loginfo "======================="
@@ -78,7 +78,6 @@ stop_app() {
 		pc_delete ${APPNAME} ${MBROOT}/config/watch.txt 
 	fi
 	# 检查日志，清除
-	logclear
 	stop
 }
 

@@ -1,7 +1,7 @@
 #!/bin/sh -eu
 #copyright by monlor
 source /tmp/mixbox.conf
-source ${MBROOT}/bin/base
+source ${MBROOT}/bin/base || exit 1
 
 APPNAME="$2"
 [ -z "${APPNAME}" ] && logerror "请输入插件名！"
@@ -11,6 +11,7 @@ UPGRADE=0
 
 install () {
 
+	check_install ${APPNAME} && logerror "${APPNAME}已安装！"
 	loginfo "开始安装插件【${APPNAME}】..."
 	wgetsh ${MBTMP}/${APPNAME}.conf ${MBURL}/apps/${APPNAME}/${APPNAME}.conf || logerror "加载远程配置文件失败！"
 	source ${MBTMP}/${APPNAME}.conf 
@@ -30,7 +31,7 @@ install () {
 		# 清除不用更新的文件
 		rm -rf ${MBTMP}/${APPNAME}/${APPNAME}.conf
 	fi 
-	cp -rf ${MBTMP}/${APPNAME}/ ${MBROOT}/apps/
+	cp -rf ${MBTMP}/${APPNAME}/ ${MBROOT}/apps/${APPNAME}
 
 	if [ -f ${MBROOT}/apps/${APPNAME}/scripts/extra.sh ]; then
 		loginfo "检查到插件有升级补丁脚本！"
@@ -38,13 +39,13 @@ install () {
 	fi
 
 	loginfo "添加插件到工具箱..."
-	if ! cat ${MBROOT}/config/applist.txt | grep -Eq "^${appname}$"; then
-		pc_append "${APPNAME}" ${MBROOT}/config/applist.txt
+	if ! cat ${MBROOT}/config/applist.txt | grep -Eq "^${appname}\|"; then
+		pc_append "${appname}|${service}|${appinfo}|${newinfo}|${supports}|${needver}|${version}" ${MBROOT}/config/applist.txt
 	fi
 
 	loginfo "添加菜单..."
 	pc_delete "^${appname}," ${MBROOT}/config/menu.txt
-	pc_append "${appname},${service},${webicon:-lock},${webpath:-/app/general/${appname}},${weborder:-2000}" ${MBROOT}/config/menu.txt
+	pc_append "${appname}|${service}|${webicon:-lock}|${webpath:-/app/general/${appname}}|${weborder:-2000}" ${MBROOT}/config/menu.txt
 
   [ ! -d ${MBINROOT}/${APPNAME} ] && mkdir -p ${MBINROOT}/${APPNAME}
 	# 清除临时文件
@@ -59,13 +60,14 @@ ${newinfo}
 -----------------------------------------
 EOF
 	fi
+	return 0
 
 }
 
 upgrade() {
 	
 	loginfo "开始更新【${APPNAME}】插件..."
-	checkuci ${APPNAME} || logerror "插件【${APPNAME}】未安装！" 
+	check_install ${APPNAME} || logerror "插件【${APPNAME}】未安装！" 
 	${MBROOT}/scripts/appmanage.sh ${APPNAME} status &> /dev/null && ENABLED=1 || ENABLED=0
 	if [ "${ENABLED}" -eq 1 ]; then
 		loginfo "先停止插件..."
@@ -79,12 +81,12 @@ upgrade() {
 		loginfo "启动插件中..."
 		${MBROOT}/scripts/appmanage.sh ${APPNAME} start
 	fi
-
+	return 0
 }
 
 uninstall() {
 
-	checkuci ${APPNAME} || logerror "插件【${APPNAME}】未安装！" 
+	check_install ${APPNAME} || logerror "插件【${APPNAME}】未安装！" 
 	loginfo "开始卸载【${APPNAME}】插件..."
 	loginfo "先停止【${APPNAME}】插件..."
 	${MBROOT}/scripts/appmanage.sh ${APPNAME} stop
@@ -95,8 +97,9 @@ uninstall() {
 	loginfo "清除所有插件文件"
   rm -rf ${MBINROOT}/${APPNAME}
 	rm -rf ${MBROOT}/apps/${APPNAME} 
+	rm -rf ${MBINROOT}/apps/${APPNAME}
   loginfo "插件【${APPNAME}】卸载完成"
-
+	return 0
 }
  
 

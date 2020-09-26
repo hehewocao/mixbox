@@ -52,5 +52,5 @@ stop () {
 }
 
 is_running() {
-	return `[ -d /opt/bin ] && echo ${PATH} | grep -q "/opt/bin"`
+	[ -d /opt/bin ] && echo ${PATH} | grep -q "/opt/bin" || return 1
 }

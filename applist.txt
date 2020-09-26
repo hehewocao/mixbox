@@ -1,0 +1,6 @@
+appname|service|appinfo|newinfo|supports|needver|version
+kms|Kms|快速搭建Windows、Office激活服务器|Support for Windows 10 1809, Windows Server 2019 and Office 2019 built-in|linux_aarch64,linux_armv7,linux_mipsle,linux_amd64,darwin_amd64|1.0.0|0.0.1
+koolproxy|KoolProxy|简单，快速屏蔽网页或视频广告，TG：https://t.me/joinchat/AAAAAD-tO7GPvfOU131_vg"|更新主程序，更新规则地址，修复bug|linux_aarch64,linux_armv7,linux_mipsle,linux_amd64|1.0.0|0.0.1
+jddailybonus|京东签到|京东多合一签到脚本||linux_aarch64,linux_armv7,linux_mipsle,linux_amd64,darwin_amd64|1.0.0|0.0.1
+entware|Entware|一款开源且强大的包管理工具，许多功能都通过它来实现||linux_aarch64,linux_armv7,linux_mipsle,linux_amd64|1.0.0|0.0.1
+clash|Clash|一款强大的代理工具，支持各种协议ss/ssr/v2ray/trojan||linux_aarch64,linux_armv7,linux_mipsle,linux_amd64|1.0.0|0.0.1

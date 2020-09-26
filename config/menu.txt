@@ -1,2 +1,2 @@
-key,text,icon,path,order
-home,首页,home,/,9999
+key|text|icon|path|order
+home|首页|home|/|9999

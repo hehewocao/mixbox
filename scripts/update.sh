@@ -1,7 +1,7 @@
 #!/bin/sh -eu
 #copyright by monlor
 source /tmp/mixbox.conf
-source ${MBROOT}/bin/base
+source ${MBROOT}/bin/base || exit 1
 
 loginfo "正在更新工具箱程序... "
 rm -rf ${MBTMP}/mixbox.tar.gz

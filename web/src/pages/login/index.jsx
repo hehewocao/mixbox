@@ -49,7 +49,7 @@ export default class extends Component {
 
 
         this.setState({loading: true, message: ''});
-        this.props.ajax.get('/api/mixbox?action=login', params, {errorTip: false, headers: { Authorization: `Basic ${token}` }})
+        this.props.ajax.get('/api/mixbox?action=sys_login', params, {errorTip: false, headers: { Authorization: `Basic ${token}` }})
             .then(res => {
                 // const {id, name} = res;
                 // setLoginUser({

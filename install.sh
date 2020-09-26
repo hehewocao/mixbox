@@ -1,8 +1,6 @@
 #!/bin/sh -eu
 #copyright by monlor
 alias loginfo='echo 【$(TZ=UTC-8 date +%Y年%m月%d日\ %X)】【INFO】:'
-alias logwarn='loginfo'
-alias logerror='loginfo'
    
 clear
 loginfo "***********************************************"
@@ -13,20 +11,28 @@ loginfo "***********************************************"
 loginfo "请按任意键安装工具箱(Ctrl + C 退出)."
 read answer
 
+MBURL="${MBURL:-https://cdn.jsdelivr.net/gh/monlor/mixbox@latest}"
+MBINURL="${MBINURL:-https://cdn.jsdelivr.net/gh/monlor/binfiles@latest}"
 # MBURL="https://raw.githubusercontent.com/monlor/mixbox/master"
-MBURL="https://cdn.jsdelivr.net/gh/monlor/mixbox@latest"
-loginfo "清理文件中..."
-rm -rf /tmp/mixbox.conf /tmp/helper.sh
+# MBINURL="https://raw.githubusercontent.com/monlor/binfiles/master"
+if [ -L /tmp/mixbox.conf ]; then
+	loginfo "工具箱配置文件已存在！请确认工具箱是否已安装！"
+	exit 1
+fi
+loginfo "加载工具箱配置文件..."
 curl -kfsSlo /tmp/mixbox.conf ${MBURL}/config/mixbox.conf || exit 1
 source /tmp/mixbox.conf
-rm -rf ${MBTMP} 
 
 loginfo "支持的兼容配置：[ ${MBHELPERS} ]"
 loginfo "请输入设备兼容配置名[回车即default]：" 
 read helper
-!(echo ${MBHELPERS} | tr ',' '\n' | grep -Eq "^${helper:=default}$") && loginfo "输入有误！" && exit 1
+!(echo ${MBHELPERS} | tr ',' '\n' | grep -Eq "^${helper:-default}$") && loginfo "输入有误！" && exit 1
 curl -kfsSlo /tmp/helper.sh ${MBURL}/helpers/${helper:-default}.sh || exit 1
 source /tmp/helper.sh
+
+loginfo "清理文件中..."
+rm -rf ${MBTMP} /tmp/mixbox.conf 
+
 [ ! -d "${MBTMP}" ] && mkdir -p ${MBTMP}
 
 ARCH=$(uname -ms | tr ' ' '_' | tr '[A-Z]' '[a-z]')
@@ -63,9 +69,18 @@ loginfo "请输入二进制程序路径[回车即${MBROOT}/apps]："
 read MBINROOT
 MBINROOT=${MBINROOT:-${MBROOT}/apps}
 
+loginfo "设置工具箱web访问用户密码..."
+loginfo "请输入你的工具箱用户名：" 
+read MBUSER
+[ -z "${MBUSER}" ] && logerror "用户名不能为空！"
+loginfo "请输入你的工具箱密码：" 
+read MBPWD
+[ -z "${MBPWD}" ] && logerror "密码不能为空！"
+
 loginfo "下载工具箱文件..."
 rm -rf ${MBTMP}/mixbox.tar.gz &> /dev/null
 wgetsh ${MBTMP}/mixbox.tar.gz ${MBINURL}/mixbox/mixbox.tar.gz || exit 1
+
 loginfo "安装工具箱文件..."
 tarsh ${MBTMP}/mixbox.tar.gz ${MBTMP}
 # 安装工具箱文件
@@ -78,16 +93,10 @@ rm -rf ${MBTMP}/mixbox
 
 loginfo "初始化工具箱配置信息..."
 mkdir ${MBROOT}/log
-touch ${MBROOT}/config/applist.txt #初始化插件列表
+mkdir ${MBROOT}/apps
 touch ${MBROOT}/config/firewall.txt
 touch ${MBROOT}/config/watch.txt
 touch ${MBROOT}/config/crontab.txt
-
-loginfo "设置工具箱web访问用户密码："
-loginfo "请输入你的工具箱用户名：" 
-read MBUSER
-loginfo "请输入你的工具箱密码：" 
-read MBPWD
 
 cat >> ${MBROOT}/config/mixbox.conf << EOF
 MBROOT="${MBROOT}"
@@ -97,6 +106,8 @@ MBINROOT="${MBINROOT}"
 MBLOG="${MBROOT}/log"
 MBUSER="${MBUSER}"
 MBPWD="${MBPWD}"
+MBURL="${MBURL}"
+MBINURL="${MBINURL}"
 EOF
 
 loginfo "执行工具箱初始化脚本..."

@@ -72,7 +72,7 @@ export default config({
     const pageLoading = loading || saving || formLoading;
 
     return (
-        <PageContent>
+        <PageContent loading={pageLoading}>
             <QueryBar>
                 <h3 style={{ marginLeft: 10 }}>{data.service}</h3>
                 <p style={{ marginLeft: 10 }}>{data.appinfo}</p>
@@ -81,7 +81,6 @@ export default config({
                 <TabPane key="basic" tab="基础设置">
                     <Basic
                         data={data}
-                        loading={pageLoading}
                         formProps={formProps}
                         submit={submit}
                         form={form}

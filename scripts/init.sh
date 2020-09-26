@@ -22,13 +22,13 @@ loginfo "检查环境变量配置"
 ln -sf ${MBROOT}/config/mixbox.conf /tmp/mixbox.conf 
 
 loginfo "检查守护进程配置"
-cru a watch "*/10 * * * * ${MBROOT}/scripts/monitor.sh watch.txt watch"
+cru a watch "*/10 * * * * ${MBROOT}/scripts/monitor.sh watch watch"
 
 loginfo "添加工具箱开机启动配置"
 power_boot_add "mixbox" "${MBROOT}/scripts/init.sh ${MBROOT}"
 
 loginfo "防火墙重启插件检查"
-firewall_restart_add "mixbox" "${MBROOT}/scripts/monitor.sh firewall.txt reload"
+firewall_restart_add "mixbox" "${MBROOT}/scripts/monitor.sh firewall reload"
 
 loginfo "下载二进制程序..."
 download_binfile "${MBINFILE}" || exit 1
@@ -41,7 +41,7 @@ fi
 
 loginfo "执行工具箱插件监控脚本"
 # 系统重启时重启插件
-${MBROOT}/scripts/monitor.sh applist.txt watch
+${MBROOT}/scripts/monitor.sh applist watch
 
 loginfo "启动web服务程序..."
 daemon_start shell2http -basic-auth ${MBUSER}:${MBPWD} -port 8088 -cgi -form /api/mixbox ${MBROOT}/scripts/shell2http.sh

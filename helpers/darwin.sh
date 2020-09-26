@@ -5,11 +5,11 @@ LANIP="127.0.0.1"
 MODEL=$(uname -s)
 
 on_install() {
-	return
+	return 0
 }
 
 on_init() {
-	return
+	return 0
 }
 
 pidsh() {

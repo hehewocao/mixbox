@@ -5,11 +5,12 @@ LANIP=$(uci get network.lan.ipaddr 2> /dev/null || echo -n "127.0.0.1")
 MODEL=$(cat /proc/xiaoqiang/model 2> /dev/null || uname -s)
 
 on_install() {
-	return
+	return 0
 }
 
 on_init() {
 	[ ! -d /tmp/etc/dnsmasq.d ] && mkdir /tmp/etc/dnsmasq.d
+	return 0
 }
 
 pidsh() {
@@ -112,7 +113,11 @@ power_boot_add() {
 #!/bin/sh /etc/rc.common
 
 START=99
-/bin/sh ${2} &
+
+start() {
+	/bin/sh ${2} &
+}
+
 EOF
 	chmod +x /etc/init.d/${1}
 	/etc/init.d/${1} enable
@@ -227,7 +232,7 @@ check_port() {
 	[ -z ${port} ] && return
 	for i in `echo ${port} | tr ',' '\n'`;do
 		if [ -n "$(netstat -ntulp | grep :${i})" ]; then
-			logwarn "检测到端口：${i} 被以下进程占用！clash无法启动！" 
+			logwarn "检测到端口：${i} 被以下进程占用！无法启动！" 
 			logerror "$(netstat -ntulp |grep :${i})"
 		fi
 	done
