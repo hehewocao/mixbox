@@ -11,10 +11,10 @@ loginfo "***********************************************"
 loginfo "请按任意键安装工具箱(Ctrl + C 退出)."
 read answer
 
-MBURL="${MBURL:-https://cdn.jsdelivr.net/gh/monlor/mixbox@latest}"
-MBINURL="${MBINURL:-https://cdn.jsdelivr.net/gh/monlor/binfiles@latest}"
-# MBURL="https://raw.githubusercontent.com/monlor/mixbox/master"
-# MBINURL="https://raw.githubusercontent.com/monlor/binfiles/master"
+#MBURL="${MBURL:-https://cdn.jsdelivr.net/gh/monlor/mixbox@latest}"
+#MBINURL="${MBINURL:-https://cdn.jsdelivr.net/gh/monlor/binfiles@latest}"
+MBURL="https://raw.githubusercontent.com/monlor/mixbox/master"
+MBINURL="https://raw.githubusercontent.com/monlor/binfiles/master"
 if [ -L /tmp/mixbox.conf ]; then
 	loginfo "工具箱配置文件已存在！请确认工具箱是否已安装！"
 	exit 1
